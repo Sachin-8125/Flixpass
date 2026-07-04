@@ -9,7 +9,7 @@ export default function AppHeader({ me, logout }) {
             <Clapperboard size={22} />
           </div>
           <div>
-            <p className="text-xl font-bold leading-tight">CineReserve</p>
+            <p className="text-xl font-bold leading-tight">Flixpass</p>
             <p className="text-sm text-zinc-500">Secure movie ticket booking</p>
           </div>
         </div>
