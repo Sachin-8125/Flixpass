@@ -83,7 +83,7 @@
 
   /* Seat map */
   .screen {
-    @apply mx-auto mt-6 w-4/5 rounded-t-xl border-t-4 border-zinc-300 bg-gradient-to-b from-zinc-200 to-transparent py-1.5 text-center text-[10px] font-black tracking-[0.4em] text-zinc-500;
+    @apply mx-auto mt-6 w-4/5 rounded-t-xl border-t-4 border-zinc-300 bg-linear-to-b from-zinc-200 to-transparent py-1.5 text-center text-[10px] font-black tracking-[0.4em] text-zinc-500;
   }
   .seat-grid {
     @apply mt-4 grid grid-cols-8 gap-1.5 sm:grid-cols-12;
