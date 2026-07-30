@@ -3,11 +3,15 @@ import { API_URL, authHeaders } from "../lib/api.js";
 
 export default function Sidebar({ bookings, isAdmin, token, refreshMovies }) {
   async function createDemoMovie() {
-    const res = await fetch(`${API_URL}/api/admin/movies/demo`, {
-      method: "POST",
-      headers: authHeaders(token),
-    });
-    if (res.ok) refreshMovies();
+    try {
+      const res = await fetch(`${API_URL}/api/admin/movies/demo`, {
+        method: "POST",
+        headers: authHeaders(token),
+      });
+      if (res.ok) refreshMovies();
+    } catch {
+      // API unreachable; nothing to refresh
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import  { useMemo } from "react";
+import { useMemo } from "react";
 import { CalendarDays, CreditCard, Ticket } from "lucide-react";
 import { money } from "../lib/money.js";
 
@@ -41,6 +41,9 @@ export default function BookingPanel({
             <strong>{money(item.priceCents)}</strong>
           </button>
         ))}
+        {!movie.showtimes?.length ? (
+          <p className="text-sm text-zinc-500 md:col-span-2">No showtimes scheduled for this movie yet.</p>
+        ) : null}
       </div>
 
       <div className="mt-4 flex flex-wrap gap-3 text-xs font-bold text-zinc-600">

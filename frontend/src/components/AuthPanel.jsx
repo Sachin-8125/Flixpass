@@ -1,6 +1,6 @@
 import { ShieldCheck, User } from "lucide-react";
 
-export default function AuthPanel({ me, mode, setMode, submitAuth, notice }) {
+export default function AuthPanel({ me, mode, setMode, submitAuth, notice, busy }) {
   if (me) {
     return (
       <aside className="panel">
@@ -34,8 +34,8 @@ export default function AuthPanel({ me, mode, setMode, submitAuth, notice }) {
         {mode === "register" ? <input name="name" placeholder="Full name" required /> : null}
         <input name="email" type="email" placeholder="Email" required />
         <input name="password" type="password" placeholder="Password" minLength="8" required />
-        <button className="primary w-full">
-          <User size={18} /> {mode === "login" ? "Sign in" : "Create account"}
+        <button className="primary w-full" disabled={busy}>
+          <User size={18} /> {busy ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}
         </button>
       </form>
       {notice ? <p className="notice">{notice}</p> : null}

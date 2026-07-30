@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_URL, authHeaders } from "./lib/api.js";
 import sampleMovies from "./data/sampleMovies.js";
 import AppHeader from "./components/AppHeader.jsx";
@@ -8,30 +8,44 @@ import MovieList from "./components/MovieList.jsx";
 import BookingPanel from "./components/BookingPanel.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("me") || "null");
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
-  const [me, setMe] = useState(JSON.parse(localStorage.getItem("me") || "null"));
+  const [me, setMe] = useState(readStoredUser);
   const [movies, setMovies] = useState(sampleMovies);
   const [selectedMovie, setSelectedMovie] = useState(sampleMovies[0]);
   const [selectedShowtime, setSelectedShowtime] = useState(sampleMovies[0].showtimes[0]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [authMode, setAuthMode] = useState("login");
+  const [authBusy, setAuthBusy] = useState(false);
   const [notice, setNotice] = useState("Using preview data until the Rust API is running.");
 
-  useEffect(() => {
+  const loadMovies = useCallback(() => {
     fetch(`${API_URL}/api/movies`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => {
-        if (data.length) {
+        if (Array.isArray(data) && data.length) {
           setMovies(data);
           setSelectedMovie(data[0]);
-          setSelectedShowtime(data[0].showtimes?.[0]);
+          setSelectedShowtime(data[0].showtimes?.[0] ?? null);
+          setSelectedSeats([]);
           setNotice("");
         }
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    loadMovies();
+  }, [loadMovies]);
 
   useEffect(() => {
     if (!token) return;
@@ -55,21 +69,28 @@ export default function App() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const payload = Object.fromEntries(form.entries());
-    const res = await fetch(`${API_URL}/api/auth/${authMode}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setNotice(data.error || "Authentication failed.");
-      return;
+    setAuthBusy(true);
+    try {
+      const res = await fetch(`${API_URL}/api/auth/${authMode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setNotice(data.error || "Authentication failed.");
+        return;
+      }
+      setToken(data.token);
+      setMe(data.user);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("me", JSON.stringify(data.user));
+      setNotice(`Signed in as ${data.user.name}.`);
+    } catch {
+      setNotice("Could not reach the API. Is the backend running?");
+    } finally {
+      setAuthBusy(false);
     }
-    setToken(data.token);
-    setMe(data.user);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("me", JSON.stringify(data.user));
-    setNotice(`Signed in as ${data.user.name}.`);
   }
 
   async function bookSeats() {
@@ -78,26 +99,33 @@ export default function App() {
       return;
     }
     if (!selectedShowtime || selectedSeats.length === 0) return;
-    const res = await fetch(`${API_URL}/api/bookings`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders(token) },
-      body: JSON.stringify({ showtimeId: selectedShowtime.id, seats: selectedSeats }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setNotice(data.error || "Could not create booking.");
-      return;
+    try {
+      const res = await fetch(`${API_URL}/api/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeaders(token) },
+        body: JSON.stringify({ showtimeId: selectedShowtime.id, seats: selectedSeats }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setNotice(data.error || "Could not create booking.");
+        return;
+      }
+      setBookings((current) => [data, ...current]);
+      setSelectedShowtime({ ...selectedShowtime, bookedSeats: [...bookedSeats, ...selectedSeats] });
+      setSelectedSeats([]);
+      setNotice("Booking confirmed.");
+    } catch {
+      setNotice("Could not reach the API. Is the backend running?");
     }
-    setBookings((current) => [data, ...current]);
-    setSelectedShowtime({ ...selectedShowtime, bookedSeats: [...bookedSeats, ...selectedSeats] });
-    setSelectedSeats([]);
-    setNotice("Booking confirmed.");
   }
 
   function logout() {
     setToken("");
     setMe(null);
-    localStorage.clear();
+    setBookings([]);
+    localStorage.removeItem("token");
+    localStorage.removeItem("me");
+    setNotice("Signed out.");
   }
 
   return (
@@ -105,7 +133,7 @@ export default function App() {
       <AppHeader me={me} logout={logout} />
       <section className="mx-auto grid max-w-7xl gap-6 px-5 py-6 lg:grid-cols-[1.2fr_.8fr]">
         <HeroBanner movie={selectedMovie} />
-        <AuthPanel me={me} mode={authMode} setMode={setAuthMode} submitAuth={submitAuth} notice={notice} />
+        <AuthPanel me={me} mode={authMode} setMode={setAuthMode} submitAuth={submitAuth} notice={notice} busy={authBusy} />
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-5 pb-8 lg:grid-cols-[330px_1fr_330px]">
@@ -123,12 +151,7 @@ export default function App() {
           total={total}
           bookSeats={bookSeats}
         />
-        <Sidebar
-          bookings={bookings}
-          isAdmin={isAdmin}
-          token={token}
-          refreshMovies={() => location.reload()}
-        />
+        <Sidebar bookings={bookings} isAdmin={isAdmin} token={token} refreshMovies={loadMovies} />
       </section>
     </main>
   );

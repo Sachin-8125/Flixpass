@@ -1,1 +1,111 @@
 @import "tailwindcss";
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  /* Panels */
+  .panel {
+    @apply rounded-lg border border-zinc-200 bg-white p-6 shadow-sm;
+  }
+  .panel h2 {
+    @apply text-lg font-bold tracking-tight text-zinc-950;
+  }
+  .panel input {
+    @apply w-full rounded-md border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10;
+  }
+
+  /* Badges & chips */
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-700;
+  }
+  .badge-dark {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-bold text-white backdrop-blur;
+  }
+  .chip {
+    @apply rounded-full border border-white/25 bg-white/10 px-3 py-1 font-semibold text-white backdrop-blur;
+  }
+
+  /* Buttons */
+  .primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-zinc-950 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-zinc-800 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+  }
+  .secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-5 py-2.5 text-sm font-bold text-zinc-900 transition hover:bg-zinc-100 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40;
+  }
+  .icon-btn {
+    @apply grid size-10 place-items-center rounded-md border border-zinc-200 bg-white text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950;
+  }
+
+  /* Auth segmented control */
+  .seg {
+    @apply flex-1 rounded px-3 py-2 text-sm font-bold capitalize text-zinc-500 transition hover:text-zinc-800;
+  }
+  .seg.active {
+    @apply bg-white text-zinc-950 shadow-sm;
+  }
+
+  /* Notices */
+  .notice {
+    @apply mt-4 rounded-md border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-sm font-medium text-amber-800;
+  }
+
+  /* Movie list */
+  .movie-row {
+    @apply flex w-full items-center gap-3 rounded-md border border-transparent p-2.5 transition hover:bg-zinc-100;
+  }
+  .movie-row.selected {
+    @apply border-zinc-950 bg-zinc-50;
+  }
+  .movie-row strong {
+    @apply block truncate text-sm font-bold text-zinc-950;
+  }
+  .movie-row small {
+    @apply block truncate text-xs text-zinc-500;
+  }
+  .poster {
+    @apply size-12 shrink-0 rounded-md shadow-inner;
+  }
+
+  /* Showtimes */
+  .showtime {
+    @apply flex items-center gap-3 rounded-md border border-zinc-200 p-3 text-left text-sm font-semibold text-zinc-800 transition hover:border-zinc-400;
+  }
+  .showtime.selected {
+    @apply border-zinc-950 bg-zinc-50 ring-1 ring-zinc-950;
+  }
+  .showtime strong {
+    @apply ml-auto shrink-0 text-zinc-950;
+  }
+
+  /* Seat map */
+  .screen {
+    @apply mx-auto mt-6 w-4/5 rounded-t-xl border-t-4 border-zinc-300 bg-gradient-to-b from-zinc-200 to-transparent py-1.5 text-center text-[10px] font-black tracking-[0.4em] text-zinc-500;
+  }
+  .seat-grid {
+    @apply mt-4 grid grid-cols-8 gap-1.5 sm:grid-cols-12;
+  }
+  .seat {
+    @apply grid aspect-square place-items-center rounded border border-zinc-300 bg-zinc-50 text-[10px] font-bold text-zinc-600 transition hover:border-zinc-500 hover:bg-white;
+  }
+  .seat.selected {
+    @apply border-rose-600 bg-rose-600 text-white hover:border-rose-600 hover:bg-rose-600;
+  }
+  .seat.booked {
+    @apply cursor-not-allowed border-zinc-800 bg-zinc-800 text-zinc-500;
+  }
+
+  /* Bookings sidebar */
+  .booking {
+    @apply rounded-md border border-zinc-200 bg-zinc-50 p-3;
+  }
+  .booking strong {
+    @apply block truncate text-sm font-bold text-zinc-950;
+  }
+  .booking span {
+    @apply text-xs text-zinc-500;
+  }
+}
